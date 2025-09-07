@@ -7,6 +7,10 @@ using SmartHome.SDK.Fibaro.Services;
 //   FIBARO_BASE_URL (e.g., https://your-home-center/api/)
 //   FIBARO_USERNAME
 //   FIBARO_PASSWORD
+// Optional action env vars:
+//   FIBARO_ACTION_DEVICE_ID (e.g., 123)
+//   FIBARO_ACTION (e.g., turnOn or setValue)
+//   FIBARO_ACTION_ARGS (comma-separated, e.g., 50 or 1,true)
 
 var baseUrl = Environment.GetEnvironmentVariable("FIBARO_BASE_URL");
 var user = Environment.GetEnvironmentVariable("FIBARO_USERNAME");
@@ -37,6 +41,26 @@ if (devices.Count > 0)
 {
     var first = devices[0];
     Console.WriteLine($"First device: {first.Id} - {first.Name}");
+}
+
+// Optional: perform an action if env vars are given
+var actionDeviceIdRaw = Environment.GetEnvironmentVariable("FIBARO_ACTION_DEVICE_ID");
+var actionName = Environment.GetEnvironmentVariable("FIBARO_ACTION");
+var actionArgsRaw = Environment.GetEnvironmentVariable("FIBARO_ACTION_ARGS");
+
+if (!string.IsNullOrWhiteSpace(actionDeviceIdRaw) && !string.IsNullOrWhiteSpace(actionName) && int.TryParse(actionDeviceIdRaw, out var actionDeviceId))
+{
+    object? parameters = null;
+    if (!string.IsNullOrWhiteSpace(actionArgsRaw))
+    {
+        // very simple comma-split args, all as strings; Fibaro often accepts numbers/strings
+        var parts = actionArgsRaw.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+        parameters = new { args = parts.Cast<object>().ToArray() };
+    }
+
+    Console.WriteLine($"Executing action '{actionName}' on device {actionDeviceId}...");
+    await client.ExecuteActionAsync(actionDeviceId, actionName!, parameters);
+    Console.WriteLine("Action executed.");
 }
 
 return 0;

@@ -41,6 +41,11 @@ var devices = await client.GetDevicesAsync();
 await client.ExecuteActionAsync(123, "turnOn");
 ```
 
+### Device actions (Basic auth)
+
+- Execute an action from code (turnOn, setValue): see `docs/usage-examples.md`.
+- Run an action from the console example using env vars: see `docs/try-it.md`.
+
 ## Features
 - HttpClient-based, DI-friendly typed client
 - Authentication: Bearer token or Basic

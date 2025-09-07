@@ -1,10 +1,34 @@
 # Usage examples (cookbook)
 
-Turn on a device:
-await client.ExecuteActionAsync(123, "turnOn");
+Basic auth client setup (recommended for Fibaro):
 
-Set value (e.g., dim level):
+```csharp
+using Microsoft.Extensions.DependencyInjection;
+using SmartHome.SDK.Fibaro.Interfaces;
+using SmartHome.SDK.Fibaro.Services;
+
+var services = new ServiceCollection();
+services.AddFibaroClient(o =>
+{
+    o.BaseAddress = new Uri("https://your-home-center/api/");
+    o.Username = "apiuser";
+    o.Password = "apipass";
+});
+var provider = services.BuildServiceProvider();
+var client = provider.GetRequiredService<IFibaroClient>();
+```
+
+Execute a device action (turn on):
+
+```csharp
+await client.ExecuteActionAsync(123, "turnOn");
+```
+
+Set value (e.g., dim level to 50):
+
+```csharp
 await client.ExecuteActionAsync(123, "setValue", new { args = new object[] { 50 } });
+```
 
 Group action (turn off all lights in room 5):
 await client.ExecuteGroupActionAsync("turnOff", new GroupActionArguments
