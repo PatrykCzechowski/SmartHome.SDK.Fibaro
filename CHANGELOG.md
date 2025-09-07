@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.2.2] - 2025-09-07
+### Changed
+- Documentation updates: README and examples refined
+
 ## [0.2.1] - 2025-09-07
 ### Changed
 - Docs: add Basic-auth ExecuteAction examples and console example env-var action run
