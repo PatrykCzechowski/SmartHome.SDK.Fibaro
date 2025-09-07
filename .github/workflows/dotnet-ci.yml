@@ -1,0 +1,66 @@
+name: .NET CI
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*.*.*'
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-test-pack:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          # Install multiple SDKs to satisfy multi-targeting
+          dotnet-version: |
+            8.0.x
+            9.0.x
+            10.0.100-preview.5.25277.114
+
+      - name: Restore
+        run: dotnet restore ./SmartHome.SDK.Fibaro.sln
+
+      - name: Build
+        run: dotnet build ./SmartHome.SDK.Fibaro.sln -c Release --no-restore
+
+      - name: Test
+        run: dotnet test ./tests/SmartHome.SDK.Fibaro.Tests/SmartHome.SDK.Fibaro.Tests.csproj -c Release --no-build --verbosity normal
+
+      - name: Pack
+        run: dotnet pack ./SmartHome.SDK.Fibaro.csproj -c Release -o ./artifacts --no-build
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget
+          path: |
+            artifacts/*.nupkg
+            artifacts/*.snupkg
+
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build-test-pack
+    runs-on: windows-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: nuget
+          path: artifacts
+
+      - name: Push to NuGet
+        env:
+          NUGET_API_KEY: ${{ secrets.NUGET_API_KEY }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          Get-ChildItem artifacts -Filter *.nupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
+          Get-ChildItem artifacts -Filter *.snupkg | ForEach-Object {
+            dotnet nuget push $_.FullName --api-key $env:NUGET_API_KEY --source https://api.nuget.org/v3/index.json --skip-duplicate
+          }
