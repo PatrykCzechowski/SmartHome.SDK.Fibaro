@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1] - 2025-09-07
+### Changed
+- Docs: add Basic-auth ExecuteAction examples and console example env-var action run
+- README: link to action examples and Try it guide
+
 ## [0.2.0] - 2025-09-07
 ### Added
 - Comprehensive Devices API coverage: filter, update, delete, actions, group, delayed, interfaces, polling, slave proxy, hierarchy, UI device info

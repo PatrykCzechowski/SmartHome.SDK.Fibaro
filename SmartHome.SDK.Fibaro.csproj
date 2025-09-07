@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
     <!-- NuGet package metadata -->
     <PackageId>SmartHome.SDK.Fibaro</PackageId>
-    <Version>0.2.0</Version>
+    <Version>0.2.1</Version>
     <Authors>Patryk Czechowski</Authors>
     <Company>Patryk Czechowski</Company>
     <Description>.NET client SDK for Fibaro/Home Center REST API integration in IoT solutions.</Description>
@@ -33,7 +33,7 @@
     <Deterministic>true</Deterministic>
     <DebugType>portable</DebugType>
     <!-- NuGet release notes -->
-    <PackageReleaseNotes>v0.2.0: Devices API coverage (filter, update, delete, actions, group, delayed, interfaces, polling, slave proxy, hierarchy, uiDeviceInfo); viewVersion overloads; docs and tests.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.2.1: Documentation polish (Basic-auth action examples, console env-var action run), README links. v0.2.0: Devices API coverage (filter, update, delete, actions, group, delayed, interfaces, polling, slave proxy, hierarchy, uiDeviceInfo); viewVersion overloads; docs and tests.</PackageReleaseNotes>
     </PropertyGroup>
 
         <ItemGroup>
