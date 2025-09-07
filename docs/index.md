@@ -14,3 +14,5 @@ Contents:
 - Versioning & release
 
 Start here: getting-started.md
+
+Quick run: try-it.md

@@ -99,6 +99,7 @@ See the `docs/` folder:
 - `docs/testing-and-ci.md` – tests and CI
 - `docs/troubleshooting.md` – common issues
 - `docs/versioning.md` – release process
+- `docs/try-it.md` – quick run example
 
 ## License
 
