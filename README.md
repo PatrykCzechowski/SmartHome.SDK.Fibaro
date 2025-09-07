@@ -27,13 +27,6 @@ services.AddFibaroClient(o =>
     o.Password = "apipass";
 });
 
-// Or: Bearer token
-// services.AddFibaroClient(o =>
-// {
-//     o.BaseAddress = new Uri("https://your-home-center/api/");
-//     o.AccessToken = "<token>";
-// });
-
 var provider = services.BuildServiceProvider();
 var client = provider.GetRequiredService<IFibaroClient>();
 
