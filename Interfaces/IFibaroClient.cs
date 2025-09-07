@@ -10,6 +10,31 @@ public interface IFibaroClient
     Task<IReadOnlyList<Device>> GetDevicesAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Returns all available devices for a specific UI view version (e.g., v2).
+    /// </summary>
+    Task<IReadOnlyList<Device>> GetDevicesAsync(string viewVersion, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns a single device by id.
+    /// </summary>
+    Task<Device?> GetDeviceAsync(int deviceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns a single device by id for a specific UI view version (e.g., v2).
+    /// </summary>
+    Task<Device?> GetDeviceAsync(int deviceId, string viewVersion, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Returns devices filtered by given filters.
+    /// </summary>
+    Task<IReadOnlyList<Device>> FilterDevicesAsync(DeviceListFiltersDto filters, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Executes a group action with filters and arguments.
+    /// </summary>
+    Task ExecuteGroupActionAsync(string actionName, GroupActionArguments args, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Executes an action on a device (e.g., turnOn, setValue, etc.).
     /// </summary>
     /// <param name="deviceId">Device identifier.</param>
@@ -17,4 +42,59 @@ public interface IFibaroClient
     /// <param name="parameters">Optional parameters for the action.</param>
     /// <param name="cancellationToken">Token to observe while waiting for the request to complete.</param>
     Task ExecuteActionAsync(int deviceId, string action, object? parameters = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Updates an existing device with provided data (partial/complete per API contract).
+    /// </summary>
+    Task<Device> UpdateDeviceAsync(int deviceId, Device device, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a device by id.
+    /// </summary>
+    Task DeleteDeviceAsync(int deviceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds interfaces to devices.
+    /// </summary>
+    Task AddInterfacesToDevicesAsync(DevicesInterfacesDto request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes interfaces from devices.
+    /// </summary>
+    Task DeleteInterfacesFromDevicesAsync(DevicesInterfacesDto request, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Adds polling interface to a device.
+    /// </summary>
+    Task<Device> AddPollingInterfaceAsync(int deviceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes polling interface from a device.
+    /// </summary>
+    Task<Device> DeletePollingInterfaceAsync(int deviceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a delayed action by timestamp and id.
+    /// </summary>
+    Task DeleteDelayedActionAsync(long timestamp, int id, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Executes an action on a device via master as proxy for slave.
+    /// </summary>
+    Task ExecuteActionOnSlaveAsync(string slaveUuid, int deviceId, string action, object? parameters = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Deletes a device on a slave via master proxy.
+    /// </summary>
+    Task DeleteDeviceOnSlaveAsync(string slaveUuid, int deviceId, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets device type hierarchy.
+    /// </summary>
+    Task<DeviceTypeHierarchy> GetDevicesHierarchyAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Gets UI device info with optional filters.
+    /// </summary>
+    Task<IReadOnlyList<DeviceInfoDto>> GetUiDeviceInfoAsync(UiDeviceInfoQuery? query = null, CancellationToken cancellationToken = default);
 }

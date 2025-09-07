@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
     <!-- NuGet package metadata -->
     <PackageId>SmartHome.SDK.Fibaro</PackageId>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>Patryk Czechowski</Authors>
     <Company>Patryk Czechowski</Company>
     <Description>.NET client SDK for Fibaro/Home Center REST API integration in IoT solutions.</Description>
@@ -27,6 +27,13 @@
         <!-- Workaround preview SDK duplicate attributes -->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <!-- SourceLink & deterministic builds -->
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <Deterministic>true</Deterministic>
+    <DebugType>portable</DebugType>
+    <!-- NuGet release notes -->
+    <PackageReleaseNotes>v0.2.0: Devices API coverage (filter, update, delete, actions, group, delayed, interfaces, polling, slave proxy, hierarchy, uiDeviceInfo); viewVersion overloads; docs and tests.</PackageReleaseNotes>
     </PropertyGroup>
 
         <ItemGroup>
@@ -37,6 +44,7 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0" />
+        <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
     </ItemGroup>
 
     <ItemGroup>

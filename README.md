@@ -19,19 +19,19 @@ using SmartHome.SDK.Fibaro.Services;
 
 var services = new ServiceCollection();
 
-// Option A: Bearer token
+// Basic auth (recommended for Fibaro/Home Center)
 services.AddFibaroClient(o =>
 {
     o.BaseAddress = new Uri("https://your-home-center/api/");
-    o.AccessToken = "<token>";
+    o.Username = "apiuser";
+    o.Password = "apipass";
 });
 
-// Option B: Basic auth
+// Or: Bearer token
 // services.AddFibaroClient(o =>
 // {
 //     o.BaseAddress = new Uri("https://your-home-center/api/");
-//     o.Username = "apiuser";
-//     o.Password = "apipass";
+//     o.AccessToken = "<token>";
 // });
 
 var provider = services.BuildServiceProvider();
@@ -49,7 +49,21 @@ await client.ExecuteActionAsync(123, "turnOn");
 
 ## API Surface
 - `Task<IReadOnlyList<Device>> GetDevicesAsync(CancellationToken ct = default)`
+- `Task<Device?> GetDeviceAsync(int deviceId, CancellationToken ct = default)`
 - `Task ExecuteActionAsync(int deviceId, string action, object? parameters = null, CancellationToken ct = default)`
+- `Task DeleteDeviceAsync(int deviceId, CancellationToken ct = default)`
+- `Task<IReadOnlyList<Device>> FilterDevicesAsync(DeviceListFiltersDto filters, CancellationToken ct = default)`
+- `Task<Device> UpdateDeviceAsync(int deviceId, Device device, CancellationToken ct = default)`
+- `Task ExecuteGroupActionAsync(string actionName, GroupActionArguments args, CancellationToken ct = default)`
+- `Task AddInterfacesToDevicesAsync(DevicesInterfacesDto request, CancellationToken ct = default)`
+- `Task DeleteInterfacesFromDevicesAsync(DevicesInterfacesDto request, CancellationToken ct = default)`
+- `Task<Device> AddPollingInterfaceAsync(int deviceId, CancellationToken ct = default)`
+- `Task<Device> DeletePollingInterfaceAsync(int deviceId, CancellationToken ct = default)`
+- `Task DeleteDelayedActionAsync(long timestamp, int id, CancellationToken ct = default)`
+- `Task ExecuteActionOnSlaveAsync(string slaveUuid, int deviceId, string action, object? parameters = null, CancellationToken ct = default)`
+- `Task DeleteDeviceOnSlaveAsync(string slaveUuid, int deviceId, CancellationToken ct = default)`
+- `Task<DeviceTypeHierarchy> GetDevicesHierarchyAsync(CancellationToken ct = default)`
+- `Task<IReadOnlyList<DeviceInfoDto>> GetUiDeviceInfoAsync(UiDeviceInfoQuery? query = null, CancellationToken ct = default)`
 
 ## Testing
 
@@ -73,6 +87,18 @@ Dotnet pack .\SmartHome.SDK.Fibaro.csproj -c Release
 ## CI/CD
 
 This repo includes a GitHub Actions workflow to build/test on push and publish on version tags. Configure the secret `NUGET_API_KEY` in your repository settings.
+
+## Documentation
+
+See the `docs/` folder:
+- `docs/getting-started.md` – install and first request
+- `docs/authentication.md` – Basic and Bearer setup
+- `docs/endpoints.md` – full API surface
+- `docs/usage-examples.md` – cookbook
+- `docs/error-handling.md` – FibaroApiException and patterns
+- `docs/testing-and-ci.md` – tests and CI
+- `docs/troubleshooting.md` – common issues
+- `docs/versioning.md` – release process
 
 ## License
 

@@ -40,6 +40,57 @@ public sealed class FibaroClient : IFibaroClient
     return (IReadOnlyList<Device>)(devices ?? new List<Device>());
     }
 
+    public async Task<IReadOnlyList<Device>> GetDevicesAsync(string viewVersion, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(viewVersion)) throw new ArgumentException("viewVersion cannot be empty", nameof(viewVersion));
+        using var response = await _http.GetAsync($"devices?viewVersion={Uri.EscapeDataString(viewVersion)}", cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to get devices (viewVersion={viewVersion}): {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        var devices = await response.Content.ReadFromJsonAsync<List<Device>>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        return (IReadOnlyList<Device>)(devices ?? new List<Device>());
+    }
+
+    public async Task<Device?> GetDeviceAsync(int deviceId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.GetAsync($"devices/{deviceId}", cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to get device {deviceId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        return await response.Content.ReadFromJsonAsync<Device>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<Device?> GetDeviceAsync(int deviceId, string viewVersion, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(viewVersion)) throw new ArgumentException("viewVersion cannot be empty", nameof(viewVersion));
+        using var response = await _http.GetAsync($"devices/{deviceId}?viewVersion={Uri.EscapeDataString(viewVersion)}", cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to get device {deviceId} (viewVersion={viewVersion}): {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        return await response.Content.ReadFromJsonAsync<Device>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+    }
+
     public async Task ExecuteActionAsync(int deviceId, string action, object? parameters = null, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(action)) throw new ArgumentException("Action cannot be empty", nameof(action));
@@ -60,6 +111,260 @@ public sealed class FibaroClient : IFibaroClient
             var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
             throw new FibaroApiException($"Failed to execute action '{action}' on device {deviceId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
         }
+    }
+
+    public async Task<IReadOnlyList<Device>> FilterDevicesAsync(DeviceListFiltersDto filters, CancellationToken cancellationToken = default)
+    {
+        if (filters is null) throw new ArgumentNullException(nameof(filters));
+
+        using var response = await _http.PostAsJsonAsync("devices/filter", filters, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to filter devices: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        var devices = await response.Content.ReadFromJsonAsync<List<Device>>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        return (IReadOnlyList<Device>)(devices ?? new List<Device>());
+    }
+
+    public async Task<Device> UpdateDeviceAsync(int deviceId, Device device, CancellationToken cancellationToken = default)
+    {
+        if (device is null) throw new ArgumentNullException(nameof(device));
+
+        using var response = await _http.PutAsJsonAsync($"devices/{deviceId}", device, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to update device {deviceId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        var updated = await response.Content.ReadFromJsonAsync<Device>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        if (updated is null) throw new FibaroApiException($"Empty response updating device {deviceId}", HttpStatusCode.OK, null);
+        return updated;
+    }
+
+    public async Task ExecuteGroupActionAsync(string actionName, GroupActionArguments args, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(actionName)) throw new ArgumentException("Action name cannot be empty", nameof(actionName));
+        if (args is null) throw new ArgumentNullException(nameof(args));
+
+        using var response = await _http.PostAsJsonAsync($"devices/groupAction/{Uri.EscapeDataString(actionName)}", args, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to execute group action '{actionName}': {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task DeleteDeviceAsync(int deviceId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.DeleteAsync($"devices/{deviceId}", cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to delete device {deviceId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task AddInterfacesToDevicesAsync(DevicesInterfacesDto request, CancellationToken cancellationToken = default)
+    {
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        using var response = await _http.PostAsJsonAsync("devices/addInterface", request, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to add interfaces: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task DeleteInterfacesFromDevicesAsync(DevicesInterfacesDto request, CancellationToken cancellationToken = default)
+    {
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        using var response = await _http.PostAsJsonAsync("devices/deleteInterface", request, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to delete interfaces: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task<Device> AddPollingInterfaceAsync(int deviceId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.PutAsync($"devices/{deviceId}/interfaces/polling", content: null, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to add polling interface to device {deviceId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        var device = await response.Content.ReadFromJsonAsync<Device>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        if (device is null) throw new FibaroApiException($"Empty response adding polling interface for device {deviceId}", HttpStatusCode.OK, null);
+        return device;
+    }
+
+    public async Task<Device> DeletePollingInterfaceAsync(int deviceId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.DeleteAsync($"devices/{deviceId}/interfaces/polling", cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to delete polling interface from device {deviceId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        var device = await response.Content.ReadFromJsonAsync<Device>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        if (device is null) throw new FibaroApiException($"Empty response deleting polling interface for device {deviceId}", HttpStatusCode.OK, null);
+        return device;
+    }
+
+    public async Task DeleteDelayedActionAsync(long timestamp, int id, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.DeleteAsync($"devices/action/{timestamp}/{id}", cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to delete delayed action {id} at {timestamp}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task ExecuteActionOnSlaveAsync(string slaveUuid, int deviceId, string action, object? parameters = null, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(slaveUuid)) throw new ArgumentException("Slave UUID cannot be empty", nameof(slaveUuid));
+        if (string.IsNullOrWhiteSpace(action)) throw new ArgumentException("Action cannot be empty", nameof(action));
+
+        var url = $"slave/{Uri.EscapeDataString(slaveUuid)}/api/devices/{deviceId}/action/{Uri.EscapeDataString(action)}";
+        var content = parameters is null ? JsonContent.Create(new { }) : JsonContent.Create(parameters);
+        using var response = await _http.PostAsync(url, content, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to execute action '{action}' on slave '{slaveUuid}' device {deviceId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task DeleteDeviceOnSlaveAsync(string slaveUuid, int deviceId, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(slaveUuid)) throw new ArgumentException("Slave UUID cannot be empty", nameof(slaveUuid));
+
+        using var response = await _http.DeleteAsync($"slave/{Uri.EscapeDataString(slaveUuid)}/api/devices/{deviceId}", cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to delete device {deviceId} on slave '{slaveUuid}': {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task<DeviceTypeHierarchy> GetDevicesHierarchyAsync(CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.GetAsync("devices/hierarchy", cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to get device type hierarchy: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        var tree = await response.Content.ReadFromJsonAsync<DeviceTypeHierarchy>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        if (tree is null) throw new FibaroApiException("Empty response for device type hierarchy", HttpStatusCode.OK, null);
+        return tree;
+    }
+
+    public async Task<IReadOnlyList<DeviceInfoDto>> GetUiDeviceInfoAsync(UiDeviceInfoQuery? query = null, CancellationToken cancellationToken = default)
+    {
+        static void AddParam(List<string> qp, string name, string? value)
+        {
+            if (!string.IsNullOrWhiteSpace(value)) qp.Add($"{name}={Uri.EscapeDataString(value)}");
+        }
+
+        static void AddBoolParam(List<string> qp, string name, bool? value)
+        {
+            if (value.HasValue) qp.Add($"{name}={(value.Value ? "true" : "false")}");
+        }
+
+        var parts = new List<string>();
+        if (query is not null)
+        {
+            if (query.RoomId.HasValue) parts.Add($"roomId={query.RoomId.Value}");
+            AddParam(parts, "type", query.Type);
+            if (query.Selectors is { Count: > 0 })
+            {
+                foreach (var s in query.Selectors)
+                    AddParam(parts, "selectors", s);
+            }
+            if (query.Source is { Count: > 0 })
+            {
+                foreach (var s in query.Source)
+                    AddParam(parts, "source", s);
+            }
+            AddBoolParam(parts, "visible", query.Visible);
+            if (query.Classification is { Count: > 0 })
+            {
+                foreach (var c in query.Classification)
+                    AddParam(parts, "classification", c.ToString());
+            }
+        }
+
+        var url = parts.Count == 0 ? "uiDeviceInfo" : $"uiDeviceInfo?{string.Join("&", parts)}";
+        using var response = await _http.GetAsync(url, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to get UI device info: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        var list = await response.Content.ReadFromJsonAsync<List<DeviceInfoDto>>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        return (IReadOnlyList<DeviceInfoDto>)(list ?? new List<DeviceInfoDto>());
     }
 
     private static async Task<string?> SafeReadAsync(HttpResponseMessage response, CancellationToken ct)
