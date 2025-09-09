@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.3] - 2025-09-09
+### Added
+- Device: typed property accessors (TryGetProperty/GetPropertyOrDefault) for converting Fibaro string/number formats
+- Device: full payload mapping (properties/actions/timestamps)
+
 ## [0.2.2] - 2025-09-07
 ### Changed
 - Documentation updates: README and examples refined
