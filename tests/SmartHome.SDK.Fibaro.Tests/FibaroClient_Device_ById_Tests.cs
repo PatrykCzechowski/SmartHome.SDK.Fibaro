@@ -13,7 +13,7 @@ public class FibaroClient_Device_ById_Tests
     [Fact]
     public async Task GetDeviceAsync_Returns_Device()
     {
-        var json = "{ \"id\": 10, \"name\": \"Switch\" }";
+    var json = "{ \"id\": 10, \"name\": \"Switch\", \"interfaces\": [\"zwave\"], \"properties\": { \"value\": \"true\" }, \"actions\": { \"turnOn\": 0 }, \"created\": 1, \"modified\": 2, \"sortOrder\": 3 }";
 
         var handler = new Mock<HttpMessageHandler>(MockBehavior.Strict);
         handler.Protected()
@@ -35,6 +35,9 @@ public class FibaroClient_Device_ById_Tests
         Assert.NotNull(device);
         Assert.Equal(10, device!.Id);
         Assert.Equal("Switch", device.Name);
+    Assert.NotNull(device.Interfaces);
+    Assert.True(device.Properties!.ContainsKey("value"));
+    Assert.True(device.Actions!.ContainsKey("turnOn"));
     }
 
     [Fact]
