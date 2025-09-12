@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.2.4] - 2025-09-12
+### Added
+- Safer ExecuteAction overload: args[], optional integrationPin and delaySeconds
+### Changed
+- Docs and README updated with examples and payload notes
+
 ## [0.2.3] - 2025-09-09
 ### Added
 - Device: typed property accessors (TryGetProperty/GetPropertyOrDefault) for converting Fibaro string/number formats

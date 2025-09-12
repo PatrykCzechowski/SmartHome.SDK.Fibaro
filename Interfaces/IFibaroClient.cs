@@ -44,6 +44,18 @@ public interface IFibaroClient
     Task ExecuteActionAsync(int deviceId, string action, object? parameters = null, CancellationToken cancellationToken = default);
 
     /// <summary>
+    /// Executes an action on a device using strongly-typed arguments array and optional integration PIN and delay.
+    /// This maps directly to DeviceActionArgumentsDto: { args, integrationPin, delay }.
+    /// </summary>
+    /// <param name="deviceId">Device identifier.</param>
+    /// <param name="action">Action name as defined by Fibaro API (e.g., setValue, turnOn).</param>
+    /// <param name="args">Action arguments array (may be empty for actions like turnOn).</param>
+    /// <param name="integrationPin">Optional integration pin for protected actions.</param>
+    /// <param name="delaySeconds">Optional action delay in seconds.</param>
+    /// <param name="cancellationToken">Token to observe while waiting for the request to complete.</param>
+    Task ExecuteActionAsync(int deviceId, string action, IEnumerable<object?> args, string? integrationPin = null, double? delaySeconds = null, CancellationToken cancellationToken = default);
+
+    /// <summary>
     /// Updates an existing device with provided data (partial/complete per API contract).
     /// </summary>
     Task<Device> UpdateDeviceAsync(int deviceId, Device device, CancellationToken cancellationToken = default);

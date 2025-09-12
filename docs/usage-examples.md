@@ -27,7 +27,10 @@ await client.ExecuteActionAsync(123, "turnOn");
 Set value (e.g., dim level to 50):
 
 ```csharp
-await client.ExecuteActionAsync(123, "setValue", new { args = new object[] { 50 } });
+// Safer overload mapping to { args, integrationPin?, delay? }
+await client.ExecuteActionAsync(123, "setValue", new object?[] { 50 });
+// With PIN and delay (optional):
+await client.ExecuteActionAsync(123, "setValue", new object?[] { 50 }, integrationPin: "1234", delaySeconds: 30);
 ```
 
 Group action (turn off all lights in room 5):

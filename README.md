@@ -39,6 +39,19 @@ await client.ExecuteActionAsync(123, "turnOn");
 - Execute an action from code (turnOn, setValue): see `docs/usage-examples.md`.
 - Run an action from the console example using env vars: see `docs/try-it.md`.
 
+### Safer ExecuteAction
+
+Use the overload that maps directly to the Fibaro payload (DeviceActionArgumentsDto):
+
+```csharp
+// { args: [50], integrationPin?: string, delay?: number }
+await client.ExecuteActionAsync(123, "setValue", new object?[] { 50 });
+// With PIN and delay:
+await client.ExecuteActionAsync(123, "setValue", new object?[] { 50 }, integrationPin: "1234", delaySeconds: 30);
+```
+
+Details: see `docs/usage-examples.md` and `docs/endpoints.md` notes.
+
 ## Features
 - HttpClient-based, DI-friendly typed client
 - Authentication: Bearer token or Basic

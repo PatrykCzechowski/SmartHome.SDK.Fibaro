@@ -13,6 +13,7 @@ Devices:
 
 Actions:
 - ExecuteActionAsync(deviceId, action, parameters?, ct)
+- ExecuteActionAsync(deviceId, action, args[], integrationPin?, delaySeconds?, ct)
 - ExecuteGroupActionAsync(actionName, args, ct)
 - DeleteDelayedActionAsync(timestamp, id, ct)
 
@@ -31,3 +32,7 @@ Other:
 - GetUiDeviceInfoAsync(query?, ct)
 
 See also models in the Models namespace.
+
+Notes on ExecuteAction payload:
+- The API expects DeviceActionArgumentsDto: { args: [], integrationPin?: string, delay?: number }.
+- Do NOT include deviceId/action in the body (they are in the URL).

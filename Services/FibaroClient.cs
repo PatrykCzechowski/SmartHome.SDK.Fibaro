@@ -113,6 +113,34 @@ public sealed class FibaroClient : IFibaroClient
         }
     }
 
+    public async Task ExecuteActionAsync(int deviceId, string action, IEnumerable<object?> args, string? integrationPin = null, double? delaySeconds = null, CancellationToken cancellationToken = default)
+    {
+        if (string.IsNullOrWhiteSpace(action)) throw new ArgumentException("Action cannot be empty", nameof(action));
+        if (args is null) throw new ArgumentNullException(nameof(args));
+
+        var url = $"devices/{deviceId}/action/{Uri.EscapeDataString(action)}";
+
+        // Build minimal payload: omit nulls/empties to avoid backend quirks
+        var argsArray = args as object?[] ?? args.ToArray();
+        var payload = new Dictionary<string, object?>
+        {
+            ["args"] = argsArray
+        };
+        if (!string.IsNullOrWhiteSpace(integrationPin)) payload["integrationPin"] = integrationPin;
+        if (delaySeconds.HasValue) payload["delay"] = delaySeconds.Value;
+
+        using var response = await _http.PostAsJsonAsync(url, payload, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try
+        {
+            response.EnsureSuccessStatusCode();
+        }
+        catch (HttpRequestException ex)
+        {
+            var resp = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to execute action '{action}' on device {deviceId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, resp, ex);
+        }
+    }
+
     public async Task<IReadOnlyList<Device>> FilterDevicesAsync(DeviceListFiltersDto filters, CancellationToken cancellationToken = default)
     {
         if (filters is null) throw new ArgumentNullException(nameof(filters));
