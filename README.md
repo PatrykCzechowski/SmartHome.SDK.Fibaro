@@ -75,6 +75,20 @@ Details: see `docs/usage-examples.md` and `docs/endpoints.md` notes.
 - `Task DeleteDeviceOnSlaveAsync(string slaveUuid, int deviceId, CancellationToken ct = default)`
 - `Task<DeviceTypeHierarchy> GetDevicesHierarchyAsync(CancellationToken ct = default)`
 - `Task<IReadOnlyList<DeviceInfoDto>> GetUiDeviceInfoAsync(UiDeviceInfoQuery? query = null, CancellationToken ct = default)`
+ 
+Scenes:
+- `Task<IReadOnlyList<SceneDto>> GetScenesAsync(bool? alexaProhibited = null, CancellationToken ct = default)`
+- `Task<SceneDto?> GetSceneAsync(int sceneId, bool? alexaProhibited = null, CancellationToken ct = default)`
+- `Task<CreateSceneResponse> CreateSceneAsync(CreateSceneRequest request, CancellationToken ct = default)`
+- `Task UpdateSceneAsync(int sceneId, UpdateSceneRequest request, CancellationToken ct = default)`
+- `Task DeleteSceneAsync(int sceneId, CancellationToken ct = default)`
+- `Task ExecuteSceneAsync(int sceneId, ExecuteSceneRequest? request = null, string? pin = null, CancellationToken ct = default)`
+- `Task ExecuteSceneSyncAsync(int sceneId, ExecuteSceneRequest? request = null, string? pin = null, CancellationToken ct = default)`
+- `Task<SceneDto> ConvertSceneAsync(int sceneId, CancellationToken ct = default)`
+- `Task<SceneDto> CopySceneAsync(int sceneId, CancellationToken ct = default)`
+- `Task<SceneDto> CopyAndConvertSceneAsync(int sceneId, CancellationToken ct = default)`
+- `Task KillSceneAsync(int sceneId, string? pin = null, CancellationToken ct = default)`
+- `Task<IReadOnlyList<SceneDto>> FilterScenesByTriggersAsync(FilterSceneRequest filters, CancellationToken ct = default)`
 
 ## Testing
 
@@ -105,6 +119,7 @@ See the `docs/` folder:
 - `docs/getting-started.md` – install and first request
 - `docs/authentication.md` – Basic and Bearer setup
 - `docs/endpoints.md` – full API surface
+- `docs/scenes.md` – guide for Scenes
 - `docs/usage-examples.md` – cookbook
 - `docs/error-handling.md` – FibaroApiException and patterns
 - `docs/testing-and-ci.md` – tests and CI

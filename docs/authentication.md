@@ -11,3 +11,7 @@ Configure via AddFibaroClient options:
 Security tips:
 - Store secrets securely (User Secrets, environment variables, or Azure Key Vault)
 - Never commit credentials
+
+PIN (Scenes / protected operations):
+- Niektóre sceny/operacje mogą wymagać PIN-u.
+- Metody `ExecuteSceneAsync`/`ExecuteSceneSyncAsync` przyjmują `pin` i wysyłają go w nagłówku `Fibaro-User-PIN`.

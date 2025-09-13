@@ -54,3 +54,29 @@ var info = await client.GetUiDeviceInfoAsync(new UiDeviceInfoQuery
     Type = "com.fibaro.light",
     Visible = true
 });
+
+### Scenes
+
+List, create, execute and kill scenes:
+
+```csharp
+// All scenes
+var scenes = await client.GetScenesAsync();
+
+// Single scene
+var scene = await client.GetSceneAsync(10);
+
+// Create a simple LUA scene (content omitted)
+var created = await client.CreateSceneAsync(new CreateSceneRequest {
+    Name = "My Scene",
+    Type = "lua",
+    Mode = "manual",
+    Content = "-- lua code"
+});
+
+// Execute with optional PIN header
+await client.ExecuteSceneAsync(created.Id, new ExecuteSceneRequest { AlexaProhibited = false }, pin: "1234");
+
+// Kill if running
+await client.KillSceneAsync(created.Id);
+```

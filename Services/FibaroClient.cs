@@ -395,6 +395,176 @@ public sealed class FibaroClient : IFibaroClient
         return (IReadOnlyList<DeviceInfoDto>)(list ?? new List<DeviceInfoDto>());
     }
 
+    // Scenes API
+    public async Task<IReadOnlyList<SceneDto>> GetScenesAsync(bool? alexaProhibited = null, CancellationToken cancellationToken = default)
+    {
+        var url = alexaProhibited.HasValue ? $"scenes?alexaProhibited={(alexaProhibited.Value ? "true" : "false")}" : "scenes";
+        using var response = await _http.GetAsync(url, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to get scenes: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+        var list = await response.Content.ReadFromJsonAsync<List<SceneDto>>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        return (IReadOnlyList<SceneDto>)(list ?? new List<SceneDto>());
+    }
+
+    public async Task<SceneDto?> GetSceneAsync(int sceneId, bool? alexaProhibited = null, CancellationToken cancellationToken = default)
+    {
+        var url = alexaProhibited.HasValue ? $"scenes/{sceneId}?alexaProhibited={(alexaProhibited.Value ? "true" : "false")}" : $"scenes/{sceneId}";
+        using var response = await _http.GetAsync(url, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to get scene {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+        return await response.Content.ReadFromJsonAsync<SceneDto>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+    }
+
+    public async Task<CreateSceneResponse> CreateSceneAsync(CreateSceneRequest request, CancellationToken cancellationToken = default)
+    {
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        using var response = await _http.PostAsJsonAsync("scenes", request, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to create scene: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+        var body = await response.Content.ReadFromJsonAsync<CreateSceneResponse>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        if (body is null) throw new FibaroApiException("Empty response when creating scene", HttpStatusCode.Created, null);
+        return body;
+    }
+
+    public async Task UpdateSceneAsync(int sceneId, UpdateSceneRequest request, CancellationToken cancellationToken = default)
+    {
+        if (request is null) throw new ArgumentNullException(nameof(request));
+        using var response = await _http.PutAsJsonAsync($"scenes/{sceneId}", request, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to update scene {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task DeleteSceneAsync(int sceneId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.DeleteAsync($"scenes/{sceneId}", cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to delete scene {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task ExecuteSceneAsync(int sceneId, ExecuteSceneRequest? request = null, string? pin = null, CancellationToken cancellationToken = default)
+    {
+        var url = $"scenes/{sceneId}/execute";
+        using var msg = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = JsonContent.Create(request ?? new ExecuteSceneRequest())
+        };
+        if (!string.IsNullOrWhiteSpace(pin)) msg.Headers.Add("Fibaro-User-PIN", pin);
+        using var response = await _http.SendAsync(msg, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to execute scene {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task ExecuteSceneSyncAsync(int sceneId, ExecuteSceneRequest? request = null, string? pin = null, CancellationToken cancellationToken = default)
+    {
+        var url = $"scenes/{sceneId}/executeSync";
+        using var msg = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Content = JsonContent.Create(request ?? new ExecuteSceneRequest())
+        };
+        if (!string.IsNullOrWhiteSpace(pin)) msg.Headers.Add("Fibaro-User-PIN", pin);
+        using var response = await _http.SendAsync(msg, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to execute scene sync {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task<SceneDto> ConvertSceneAsync(int sceneId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.PostAsync($"scenes/{sceneId}/convert", content: null, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to convert scene {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+        var dto = await response.Content.ReadFromJsonAsync<SceneDto>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        if (dto is null) throw new FibaroApiException($"Empty response converting scene {sceneId}", HttpStatusCode.OK, null);
+        return dto;
+    }
+
+    public async Task<SceneDto> CopySceneAsync(int sceneId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.PostAsync($"scenes/{sceneId}/copy", content: null, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to copy scene {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+        var dto = await response.Content.ReadFromJsonAsync<SceneDto>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        if (dto is null) throw new FibaroApiException($"Empty response copying scene {sceneId}", HttpStatusCode.OK, null);
+        return dto;
+    }
+
+    public async Task<SceneDto> CopyAndConvertSceneAsync(int sceneId, CancellationToken cancellationToken = default)
+    {
+        using var response = await _http.PostAsync($"scenes/{sceneId}/copyAndConvert", content: null, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to copy and convert scene {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+        var dto = await response.Content.ReadFromJsonAsync<SceneDto>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        if (dto is null) throw new FibaroApiException($"Empty response copy&convert scene {sceneId}", HttpStatusCode.OK, null);
+        return dto;
+    }
+
+    public async Task KillSceneAsync(int sceneId, string? pin = null, CancellationToken cancellationToken = default)
+    {
+        var url = $"scenes/{sceneId}/kill";
+        using var msg = new HttpRequestMessage(HttpMethod.Post, url);
+        if (!string.IsNullOrWhiteSpace(pin)) msg.Headers.Add("Fibaro-User-PIN", pin);
+        using var response = await _http.SendAsync(msg, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to kill scene {sceneId}: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
+    public async Task<IReadOnlyList<SceneDto>> FilterScenesByTriggersAsync(FilterSceneRequest filters, CancellationToken cancellationToken = default)
+    {
+        if (filters is null) throw new ArgumentNullException(nameof(filters));
+        using var response = await _http.PostAsJsonAsync("scenes/hasTriggers", filters, _jsonOptions, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to filter scenes by triggers: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+        var list = await response.Content.ReadFromJsonAsync<List<SceneDto>>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        return (IReadOnlyList<SceneDto>)(list ?? new List<SceneDto>());
+    }
+
     private static async Task<string?> SafeReadAsync(HttpResponseMessage response, CancellationToken ct)
     {
         try

@@ -31,8 +31,26 @@ Other:
 - GetDevicesHierarchyAsync(ct)
 - GetUiDeviceInfoAsync(query?, ct)
 
+Scenes:
+- GetScenesAsync(alexaProhibited?, ct)
+- GetSceneAsync(sceneId, alexaProhibited?, ct)
+- CreateSceneAsync(request, ct)
+- UpdateSceneAsync(sceneId, request, ct)
+- DeleteSceneAsync(sceneId, ct)
+- ExecuteSceneAsync(sceneId, request?, pin?, ct)
+- ExecuteSceneSyncAsync(sceneId, request?, pin?, ct)
+- ConvertSceneAsync(sceneId, ct)
+- CopySceneAsync(sceneId, ct)
+- CopyAndConvertSceneAsync(sceneId, ct)
+- KillSceneAsync(sceneId, pin?, ct)
+- FilterScenesByTriggersAsync(filters, ct)
+
 See also models in the Models namespace.
 
 Notes on ExecuteAction payload:
 - The API expects DeviceActionArgumentsDto: { args: [], integrationPin?: string, delay?: number }.
 - Do NOT include deviceId/action in the body (they are in the URL).
+
+Notes on Scenes execute:
+- `pin` is sent in header `Fibaro-User-PIN` for POST variants.
+- `ExecuteSceneRequest` supports `alexaProhibited` and optional `args` object.

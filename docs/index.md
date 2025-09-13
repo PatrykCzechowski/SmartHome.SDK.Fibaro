@@ -8,6 +8,7 @@ Contents:
 - Authentication
 - Endpoints (API surface)
 - Usage examples (cookbook)
+- Scenes
 - Error handling
 - Testing & CI
 - Troubleshooting

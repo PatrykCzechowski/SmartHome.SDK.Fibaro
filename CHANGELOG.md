@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.3.0] - 2025-09-13
+### Added
+- Scenes API support: list/get, create/update/delete, execute/executeSync (PIN header), convert/copy/copyAndConvert, kill, filter by triggers
+- Documentation: getting-started, endpoints, scenes guide with examples
+- Unit tests for key Scenes flows
+
 ## [0.2.4] - 2025-09-12
 ### Added
 - Safer ExecuteAction overload: args[], optional integrationPin and delaySeconds

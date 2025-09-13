@@ -109,4 +109,24 @@ public interface IFibaroClient
     /// Gets UI device info with optional filters.
     /// </summary>
     Task<IReadOnlyList<DeviceInfoDto>> GetUiDeviceInfoAsync(UiDeviceInfoQuery? query = null, CancellationToken cancellationToken = default);
+
+    // Scenes API
+    Task<IReadOnlyList<SceneDto>> GetScenesAsync(bool? alexaProhibited = null, CancellationToken cancellationToken = default);
+    Task<SceneDto?> GetSceneAsync(int sceneId, bool? alexaProhibited = null, CancellationToken cancellationToken = default);
+    Task<CreateSceneResponse> CreateSceneAsync(CreateSceneRequest request, CancellationToken cancellationToken = default);
+    Task UpdateSceneAsync(int sceneId, UpdateSceneRequest request, CancellationToken cancellationToken = default);
+    Task DeleteSceneAsync(int sceneId, CancellationToken cancellationToken = default);
+
+    // Execute scene (async and sync variants; pin can be header or query as per API)
+    Task ExecuteSceneAsync(int sceneId, ExecuteSceneRequest? request = null, string? pin = null, CancellationToken cancellationToken = default);
+    Task ExecuteSceneSyncAsync(int sceneId, ExecuteSceneRequest? request = null, string? pin = null, CancellationToken cancellationToken = default);
+
+    // Additional helpers from API
+    Task<SceneDto> ConvertSceneAsync(int sceneId, CancellationToken cancellationToken = default);
+    Task<SceneDto> CopySceneAsync(int sceneId, CancellationToken cancellationToken = default);
+    Task<SceneDto> CopyAndConvertSceneAsync(int sceneId, CancellationToken cancellationToken = default);
+    Task KillSceneAsync(int sceneId, string? pin = null, CancellationToken cancellationToken = default);
+
+    // Filter scenes by triggers
+    Task<IReadOnlyList<SceneDto>> FilterScenesByTriggersAsync(FilterSceneRequest filters, CancellationToken cancellationToken = default);
 }
