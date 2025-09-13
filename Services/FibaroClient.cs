@@ -395,6 +395,71 @@ public sealed class FibaroClient : IFibaroClient
         return (IReadOnlyList<DeviceInfoDto>)(list ?? new List<DeviceInfoDto>());
     }
 
+    public async Task<IReadOnlyList<HistoryEventDto>> GetHistoryEventsAsync(HistoryEventsQuery? query = null, CancellationToken cancellationToken = default)
+    {
+        static void Add(List<string> qp, string name, string? value)
+        {
+            if (!string.IsNullOrWhiteSpace(value)) qp.Add($"{name}={Uri.EscapeDataString(value)}");
+        }
+
+        var parts = new List<string>();
+        if (query is not null)
+        {
+            Add(parts, "eventType", query.EventType);
+            if (query.From.HasValue) parts.Add($"from={query.From.Value}");
+            if (query.To.HasValue) parts.Add($"to={query.To.Value}");
+            Add(parts, "sourceType", query.SourceType);
+            if (query.SourceId.HasValue) parts.Add($"sourceId={query.SourceId.Value}");
+            Add(parts, "objectType", query.ObjectType);
+            if (query.ObjectId.HasValue) parts.Add($"objectId={query.ObjectId.Value}");
+            if (query.LastId.HasValue) parts.Add($"lastId={query.LastId.Value}");
+            if (query.NumberOfRecords.HasValue) parts.Add($"numberOfRecords={query.NumberOfRecords.Value}");
+            if (query.RoomId.HasValue) parts.Add($"roomId={query.RoomId.Value}");
+            if (query.SectionId.HasValue) parts.Add($"sectionId={query.SectionId.Value}");
+            if (query.Category.HasValue) parts.Add($"category={query.Category.Value}");
+        }
+
+        var url = parts.Count == 0 ? "events/history" : $"events/history?{string.Join("&", parts)}";
+        using var response = await _http.GetAsync(url, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to get history events: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+
+        var list = await response.Content.ReadFromJsonAsync<List<HistoryEventDto>>(_jsonOptions, cancellationToken).ConfigureAwait(false);
+        return (IReadOnlyList<HistoryEventDto>)(list ?? new List<HistoryEventDto>());
+    }
+
+    public async Task DeleteHistoryEventsAsync(DeleteHistoryQuery? query = null, CancellationToken cancellationToken = default)
+    {
+        static void Add(List<string> qp, string name, string? value)
+        {
+            if (!string.IsNullOrWhiteSpace(value)) qp.Add($"{name}={Uri.EscapeDataString(value)}");
+        }
+
+        var parts = new List<string>();
+        if (query is not null)
+        {
+            Add(parts, "eventType", query.EventType);
+            if (query.Timestamp.HasValue) parts.Add($"timestamp={query.Timestamp.Value}");
+            if (query.Shrink.HasValue) parts.Add($"shrink={query.Shrink.Value}");
+            Add(parts, "objectType", query.ObjectType);
+            if (query.ObjectId.HasValue) parts.Add($"objectId={query.ObjectId.Value}");
+        }
+
+        var url = parts.Count == 0 ? "events/history" : $"events/history?{string.Join("&", parts)}";
+        using var request = new HttpRequestMessage(HttpMethod.Delete, url);
+        using var response = await _http.SendAsync(request, cancellationToken).ConfigureAwait(false);
+        try { response.EnsureSuccessStatusCode(); }
+        catch (HttpRequestException ex)
+        {
+            var payload = await SafeReadAsync(response, cancellationToken).ConfigureAwait(false);
+            throw new FibaroApiException($"Failed to delete history events: {(int)response.StatusCode} {response.ReasonPhrase}", response.StatusCode, payload, ex);
+        }
+    }
+
     // Scenes API
     public async Task<IReadOnlyList<SceneDto>> GetScenesAsync(bool? alexaProhibited = null, CancellationToken cancellationToken = default)
     {

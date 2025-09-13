@@ -80,3 +80,25 @@ await client.ExecuteSceneAsync(created.Id, new ExecuteSceneRequest { AlexaProhib
 // Kill if running
 await client.KillSceneAsync(created.Id);
 ```
+
+### History events
+
+Pobranie historii z filtrami i czyszczenie:
+
+```csharp
+var events = await client.GetHistoryEventsAsync(new HistoryEventsQuery
+{
+    EventType = "alarm",
+    From = DateTimeOffset.UtcNow.AddDays(-1).ToUnixTimeSeconds(),
+    SourceType = "device",
+    RoomId = 5,
+    NumberOfRecords = 100
+});
+
+await client.DeleteHistoryEventsAsync(new DeleteHistoryQuery
+{
+    EventType = "alarm",
+    Timestamp = DateTimeOffset.UtcNow.AddDays(-30).ToUnixTimeSeconds(),
+    Shrink = 5000
+});
+```

@@ -45,6 +45,10 @@ Scenes:
 - KillSceneAsync(sceneId, pin?, ct)
 - FilterScenesByTriggersAsync(filters, ct)
 
+History Events:
+- GetHistoryEventsAsync(query?, ct)
+- DeleteHistoryEventsAsync(query?, ct)
+
 See also models in the Models namespace.
 
 Notes on ExecuteAction payload:

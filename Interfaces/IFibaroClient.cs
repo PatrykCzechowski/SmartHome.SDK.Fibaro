@@ -129,4 +129,8 @@ public interface IFibaroClient
 
     // Filter scenes by triggers
     Task<IReadOnlyList<SceneDto>> FilterScenesByTriggersAsync(FilterSceneRequest filters, CancellationToken cancellationToken = default);
+
+    // History Events API
+    Task<IReadOnlyList<HistoryEventDto>> GetHistoryEventsAsync(HistoryEventsQuery? query = null, CancellationToken cancellationToken = default);
+    Task DeleteHistoryEventsAsync(DeleteHistoryQuery? query = null, CancellationToken cancellationToken = default);
 }
