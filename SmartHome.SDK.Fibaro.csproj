@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
     <!-- NuGet package metadata -->
     <PackageId>SmartHome.SDK.Fibaro</PackageId>
-    <Version>0.3.0</Version>
+    <Version>0.3.1</Version>
     <Authors>Patryk Czechowski</Authors>
     <Company>Patryk Czechowski</Company>
     <Description>.NET client SDK for Fibaro/Home Center REST API integration in IoT solutions.</Description>
@@ -33,7 +33,7 @@
     <Deterministic>true</Deterministic>
     <DebugType>portable</DebugType>
     <!-- NuGet release notes -->
-    <PackageReleaseNotes>v0.3.0: Scenes API support (list/get/create/update/delete, execute/executeSync with PIN header, convert/copy/copyAndConvert, kill, filter by triggers); docs (getting-started, endpoints, scenes) and tests. v0.2.4: Safer ExecuteAction overload (args[], integrationPin?, delay?) + docs/README updates. v0.2.3: Device typed property accessors (TryGetProperty/GetPropertyOrDefault) and full /devices/{id} payload mapping. v0.2.2: Documentation updates (README tweaks, examples). v0.2.1: Documentation polish (Basic-auth action examples, console env-var action run), README links. v0.2.0: Devices API coverage (filter, update, delete, actions, group, delayed, interfaces, polling, slave proxy, hierarchy, uiDeviceInfo); viewVersion overloads; docs and tests.</PackageReleaseNotes>
+    <PackageReleaseNotes>v0.3.1: History Events API (GET /events/history with filters, DELETE /events/history with shrink/timestamp), models, docs and tests. v0.3.0: Scenes API support (list/get/create/update/delete, execute/executeSync with PIN header, convert/copy/copyAndConvert, kill, filter by triggers); docs (getting-started, endpoints, scenes) and tests. v0.2.4: Safer ExecuteAction overload (args[], integrationPin?, delay?) + docs/README updates. v0.2.3: Device typed property accessors (TryGetProperty/GetPropertyOrDefault) and full /devices/{id} payload mapping. v0.2.2: Documentation updates (README tweaks, examples). v0.2.1: Documentation polish (Basic-auth action examples, console env-var action run), README links. v0.2.0: Devices API coverage (filter, update, delete, actions, group, delayed, interfaces, polling, slave proxy, hierarchy, uiDeviceInfo); viewVersion overloads; docs and tests.</PackageReleaseNotes>
     </PropertyGroup>
 
         <ItemGroup>

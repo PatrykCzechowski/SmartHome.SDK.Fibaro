@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.1] - 2025-09-13
+### Added
+- History Events API: GET /events/history (filtry: eventType, from/to, source/object type/id, lastId, numberOfRecords, room/section/category) oraz DELETE /events/history (eventType, timestamp, shrink, objectType, objectId)
+- Modele i testy jednostkowe; dokumentacja w endpoints i usage-examples
+
 ## [0.3.0] - 2025-09-13
 ### Added
 - Scenes API support: list/get, create/update/delete, execute/executeSync (PIN header), convert/copy/copyAndConvert, kill, filter by triggers

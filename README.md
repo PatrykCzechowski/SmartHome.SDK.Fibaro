@@ -90,6 +90,10 @@ Scenes:
 - `Task KillSceneAsync(int sceneId, string? pin = null, CancellationToken ct = default)`
 - `Task<IReadOnlyList<SceneDto>> FilterScenesByTriggersAsync(FilterSceneRequest filters, CancellationToken ct = default)`
 
+History Events:
+- `Task<IReadOnlyList<HistoryEventDto>> GetHistoryEventsAsync(HistoryEventsQuery? query = null, CancellationToken ct = default)`
+- `Task DeleteHistoryEventsAsync(DeleteHistoryQuery? query = null, CancellationToken ct = default)`
+
 ## Testing
 
 Project includes xUnit + Moq tests. To run:
